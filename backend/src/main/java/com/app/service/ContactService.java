@@ -35,4 +35,12 @@ public class ContactService {
     public List<Contact> getAllContacts() {
         return contactRepository.findAllByOrderByCreatedAtDesc();
     }
+
+    @Transactional
+    public Contact updateStatus(Long id, String status) {
+        Contact contact = contactRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Contact not found: " + id));
+        contact.setStatus(status);
+        return contactRepository.save(contact);
+    }
 }

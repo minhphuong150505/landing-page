@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type { ContactRequest, NewsletterRequest, ApiResponse } from '../types'
+import type { ContactRequest, NewsletterRequest, UGCRegisterRequest, SlotRequest, ApiResponse, PageViewRequest, DashboardStats, VisitorStats, AdminContact, AdminNewsletter, AdminSlotBooking, AdminUGCRegistration } from '../types'
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
@@ -15,4 +15,38 @@ export const contactApi = {
 export const newsletterApi = {
   subscribe: (data: NewsletterRequest) =>
     api.post<ApiResponse>('/api/newsletter/subscribe', data).then(r => r.data),
+}
+
+export const ugcApi = {
+  register: (data: UGCRegisterRequest) =>
+    api.post<ApiResponse>('/api/ugc/register', data).then(r => r.data),
+}
+
+export const slotApi = {
+  book: (data: SlotRequest) =>
+    api.post<ApiResponse>('/api/slot/book', data).then(r => r.data),
+}
+
+export const trackingApi = {
+  pageview: (data: PageViewRequest) =>
+    api.post<ApiResponse>('/api/tracking/pageview', data).then(r => r.data),
+}
+
+export const adminApi = {
+  dashboard: () =>
+    api.get<ApiResponse<DashboardStats>>('/api/admin/dashboard').then(r => r.data),
+  contacts: () =>
+    api.get<ApiResponse<AdminContact[]>>('/api/admin/contacts').then(r => r.data),
+  updateContactStatus: (id: number, status: string) =>
+    api.put<ApiResponse<AdminContact>>(`/api/admin/contacts/${id}/status`, { status }).then(r => r.data),
+  newsletter: () =>
+    api.get<ApiResponse<AdminNewsletter[]>>('/api/admin/newsletter').then(r => r.data),
+  slots: () =>
+    api.get<ApiResponse<AdminSlotBooking[]>>('/api/admin/slots').then(r => r.data),
+  updateSlotStatus: (id: number, status: string) =>
+    api.put<ApiResponse<AdminSlotBooking>>(`/api/admin/slots/${id}/status`, { status }).then(r => r.data),
+  ugc: () =>
+    api.get<ApiResponse<AdminUGCRegistration[]>>('/api/admin/ugc').then(r => r.data),
+  visitorStats: () =>
+    api.get<ApiResponse<VisitorStats>>('/api/admin/visitor-stats').then(r => r.data),
 }

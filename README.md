@@ -1,6 +1,6 @@
-# NexaTech Landing Page
+# BABÉ 26 — The Running Babes
 
-A production-ready fullstack landing page with contact form and newsletter subscription.
+Landing page cho sự kiện chạy bộ đầu tiên của BABÉ Laboratorios tại Việt Nam. 6 km Thủ Thiêm · 10.05.2026. Break the loop.
 
 ## Tech Stack
 
@@ -13,11 +13,16 @@ A production-ready fullstack landing page with contact form and newsletter subsc
 
 ## Features
 
-- Responsive landing page with Navbar, Hero, Features, About, Testimonials sections
-- Contact form with validation — submissions saved to MySQL
-- Newsletter subscription with duplicate-email protection
-- REST API with global error handling and proper HTTP status codes
-- Docker multi-stage builds for minimal image sizes
+- Landing page đầy đủ các section: Navbar, Marquee, Hero, Live Counter, Journey (3 steps), UGC Challenge, Marathon, Trade-in, Why BABÉ, FAQ, Footer CTA
+- Inner pages: Về BABÉ, Liên hệ, Chính sách bảo mật, Điều khoản sử dụng
+- Đăng ký UGC Challenge — submissions saved to MySQL
+- Đặt slot soi da miễn phí tại finish line
+- Đăng ký nhận newsletter
+- Countdown timer đếm ngược đến ngày chạy 10/05/2026
+- Leaflet route map với animation player
+- FAQ accordion với toggle animation
+- Scroll fade-up animations
+- Responsive design
 
 ## Quick Start
 
@@ -59,9 +64,11 @@ npm run dev
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| POST | `/api/contact` | Submit contact form |
-| POST | `/api/newsletter/subscribe` | Subscribe to newsletter |
-| DELETE | `/api/newsletter/unsubscribe/{email}` | Unsubscribe |
+| POST | `/api/contact` | Gửi liên hệ |
+| POST | `/api/newsletter/subscribe` | Đăng ký newsletter |
+| DELETE | `/api/newsletter/unsubscribe/{email}` | Hủy đăng ký newsletter |
+| POST | `/api/ugc/register` | Đăng ký UGC Challenge |
+| POST | `/api/slot/book` | Đặt slot soi da |
 
 ### Example: Submit Contact Form
 
@@ -69,10 +76,33 @@ npm run dev
 curl -X POST http://localhost:8080/api/contact \
   -H "Content-Type: application/json" \
   -d '{
-    "name": "John Doe",
-    "email": "john@example.com",
-    "subject": "Project Inquiry",
-    "message": "Hello, I would like to discuss a project."
+    "name": "Nguyễn Thị Lan",
+    "email": "lan@example.com",
+    "subject": "Hỏi về UGC Challenge",
+    "message": "Tôi muốn biết thêm chi tiết về cách tham gia."
+  }'
+```
+
+### Example: UGC Registration
+
+```bash
+curl -X POST http://localhost:8080/api/ugc/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Nguyễn Thị Lan",
+    "phone": "0901234567",
+    "handle": "@lan_runner"
+  }'
+```
+
+### Example: Slot Booking
+
+```bash
+curl -X POST http://localhost:8080/api/slot/book \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Nguyễn Thị Lan",
+    "phone": "0901234567"
   }'
 ```
 
@@ -86,8 +116,11 @@ landing-page/
 │   └── src/main/java/com/app/
 │       ├── LandingPageApplication.java
 │       ├── config/CorsConfig.java
-│       ├── controller/ContactController.java
-│       ├── controller/NewsletterController.java
+│       ├── controller/
+│       │   ├── ContactController.java
+│       │   ├── NewsletterController.java
+│       │   ├── UGCRegistrationController.java
+│       │   └── SlotBookingController.java
 │       ├── dto/
 │       ├── entity/
 │       ├── exception/GlobalExceptionHandler.java
@@ -99,8 +132,42 @@ landing-page/
 │   ├── package.json
 │   └── src/
 │       ├── components/
+│       │   ├── Navbar.tsx
+│       │   ├── MarqueeBar.tsx
+│       │   ├── Hero.tsx
+│       │   ├── LiveCounter.tsx
+│       │   ├── Journey.tsx
+│       │   ├── UGCChallenge.tsx
+│       │   ├── Marathon.tsx
+│       │   ├── TradeIn.tsx
+│       │   ├── WhyBabe.tsx
+│       │   ├── FAQ.tsx
+│       │   ├── FooterCTA.tsx
+│       │   ├── RouteMapModal.tsx
+│       │   ├── SuccessModal.tsx
+│       │   └── SlotModal.tsx
+│       ├── pages/
+│       │   ├── AboutPage.tsx
+│       │   ├── ContactPage.tsx
+│       │   ├── PolicyPage.tsx
+│       │   └── TermsPage.tsx
 │       ├── services/api.ts
 │       └── types/index.ts
 ├── docker-compose.yml
 └── README.md
 ```
+
+## Design Tokens
+
+| Token | Value | Usage |
+|-------|-------|-------|
+| `--g700` | #6FA234 | Primary green |
+| `--g641` | #74A641 | Hover green |
+| `--g83` | #9ABA83 | Text accent |
+| `--ink` | #1A1A1A | Dark text/background |
+| `--paper` | #FBFAF6 | Light section background |
+| `--cream` | #F4F1EA | Trade-in section |
+
+## License
+
+© 2026 Laboratorios BABÉ. All rights reserved.
