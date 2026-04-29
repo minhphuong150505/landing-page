@@ -3,16 +3,113 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --g700: #6FA234;
+    --g641: #74A641;
+    --g555: #7EAA55;
+    --g46c: #8DB36C;
+    --g83: #9ABA83;
+    --g99: #AAC499;
+    --gaf: #BBCFAF;
+    --g50: #CBDAC4;
+    --ink: #1A1A1A;
+    --paper: #FBFAF6;
+    --cream: #F4F1EA;
+  }
   html {
     scroll-behavior: smooth;
   }
   body {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    background: var(--ink);
+    color: #fff;
+    overflow-x: hidden;
   }
 }
 
+@keyframes ringspin {
+  to { transform: rotate(360deg); }
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+@keyframes scrollbounce {
+  0%, 100% { transform: rotate(45deg) translateY(0); }
+  50% { transform: rotate(45deg) translateY(6px); }
+}
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 22s linear infinite;
+}
+
 @layer utilities {
-  .text-gradient {
-    @apply bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent;
+  .eyebrow {
+    @apply text-[11px] font-bold tracking-[0.14em] uppercase;
+  }
+  .display-xl {
+    font-size: clamp(56px, 9vw, 112px);
+    @apply font-black leading-[0.88] tracking-[-0.03em];
+  }
+  .display-lg {
+    font-size: clamp(36px, 5vw, 64px);
+    @apply font-black leading-[0.92] tracking-[-0.025em];
+  }
+  .display-md {
+    font-size: clamp(28px, 3.5vw, 44px);
+    @apply font-extrabold leading-none tracking-[-0.02em];
+  }
+  .label-sm {
+    @apply text-xs font-bold tracking-[0.1em] uppercase;
+  }
+  .section-header {
+    @apply text-center mb-16;
+  }
+  .section-eyebrow {
+    color: var(--g700);
+    @apply mb-3.5;
+  }
+  .section-title {
+    @apply text-white mb-4;
+  }
+  .section-sub {
+    @apply text-base text-white/45 max-w-[480px] mx-auto leading-relaxed;
+  }
+  .btn-primary {
+    background: var(--g700);
+    @apply text-white px-8 py-3.5 rounded-full text-[15px] font-extrabold tracking-wide transition-all duration-200 cursor-pointer border-none;
+  }
+  .btn-primary:hover {
+    background: var(--g641);
+    @apply scale-105;
+  }
+  .btn-ghost {
+    @apply bg-transparent text-white px-8 py-3.5 rounded-full text-[15px] font-bold border-[1.5px] border-white/20 transition-all duration-200 cursor-pointer;
+  }
+  .btn-ghost:hover {
+    border-color: var(--g83);
+    color: var(--g83);
+    @apply scale-[1.02];
+  }
+  .btn-white {
+    @apply bg-white text-[#6FA234] px-7 py-3 rounded-full text-sm font-black border-none cursor-pointer transition-all duration-200;
+  }
+  .btn-white:hover {
+    @apply scale-105;
+  }
+  .btn-white-ghost {
+    @apply bg-transparent text-white px-7 py-3 rounded-full text-sm font-bold border-[1.5px] border-white/35 cursor-pointer transition-all duration-200;
+  }
+  .btn-white-ghost:hover {
+    @apply border-white scale-[1.02];
+  }
+  .fade-up {
+    @apply opacity-0 translate-y-7 transition-all duration-[550ms] ease-out;
+  }
+  .fade-up.visible {
+    @apply opacity-100 translate-y-0;
   }
 }

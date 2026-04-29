@@ -10,4 +10,5 @@ import java.util.Optional;
 public interface NewsletterRepository extends JpaRepository<Newsletter, Long> {
     Optional<Newsletter> findByEmail(String email);
     boolean existsByEmail(String email);
+    long countByActive(boolean active);
 }
