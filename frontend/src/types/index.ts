@@ -12,8 +12,8 @@ export interface NewsletterRequest {
 
 export interface UGCRegisterRequest {
   name: string
-  phone: string
-  handle?: string
+  email: string
+  platform: string
 }
 
 export interface SlotRequest {
@@ -78,8 +78,19 @@ export interface AdminSlotBooking {
 export interface AdminUGCRegistration {
   id: number
   name: string
-  phone: string
-  handle?: string
+  email: string
+  platform: string
   status: string
   createdAt: string
+}
+
+export interface LoginRequest {
+  username: string
+  password: string
+}
+
+export interface LoginResponse {
+  token: string
+  expiresAt: number
+  username: string
 }
