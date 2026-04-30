@@ -2,6 +2,61 @@
 
 Landing page cho sự kiện chạy bộ đầu tiên của BABÉ Laboratorios tại Việt Nam. 6 km Thủ Thiêm · 10.05.2026. Break the loop.
 
+---
+
+## Truy cập Production
+
+| Mục | Giá trị |
+|---|---|
+| **Landing page** | https://34.27.241.13.nip.io |
+| **Admin dashboard** | https://34.27.241.13.nip.io/admin |
+| **Admin username** | `admin` |
+| **Admin password** | `g8CnybNdm0pN8cls7aKdsmck` |
+
+## Hạ tầng GCP
+
+| Resource | Chi tiết |
+|---|---|
+| **GCP Project** | `deploy-app-web-494904` |
+| **VM** | `landing-vm` — e2-small, zone `us-central1-a` |
+| **VM External IP** | `34.27.241.13` (static) |
+| **Cloud SQL** | `landing-db` — MySQL 8.0, db-f1-micro, region `us-central1` |
+| **Cloud SQL IP** | `34.30.22.222` |
+| **DB name / user** | `landing_db` / `app_user` |
+| **Chi phí ước tính** | ~$23/tháng (VM $13 + Cloud SQL $10) |
+
+### Kiến trúc production
+
+```
+Internet → Caddy (HTTPS/TLS auto)
+               ├── /api/*  →  Spring Boot API (:8080)
+               └── /*      →  Nginx + React   (:80)
+                                    │
+                               Cloud SQL MySQL
+```
+
+### Deploy / Cập nhật
+
+```bash
+bash deploy.sh   # ~4-5 phút, upload ~330KB
+```
+
+### SSH vào VM
+
+```bash
+gcloud compute ssh landing-vm --zone=us-central1-a --project=deploy-app-web-494904
+# Xem logs trên VM:
+cd ~/app && docker compose -f docker-compose.prod.yml logs -f api
+```
+
+### Kết nối Cloud SQL
+
+```bash
+gcloud sql connect landing-db --user=app_user --database=landing_db --project=deploy-app-web-494904
+```
+
+---
+
 ## Tech Stack
 
 | Layer | Technology |
