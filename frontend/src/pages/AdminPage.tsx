@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { adminApi } from '../services/api'
+import { auth } from '../services/auth'
 import type {
   DashboardStats,
   VisitorStats,
@@ -69,6 +71,7 @@ function TopPaths({ data }: { data: Record<string, number> }) {
 }
 
 export default function AdminPage() {
+  const nav = useNavigate()
   const [tab, setTab] = useState<Tab>('contacts')
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [visitorStats, setVisitorStats] = useState<VisitorStats | null>(null)
@@ -122,9 +125,12 @@ export default function AdminPage() {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <span className="text-xs bg-yellow-100 text-yellow-700 border border-yellow-300 px-3 py-1 rounded-full">
-            TODO: cần xác thực trước khi deploy production
-          </span>
+          <button
+            onClick={() => { auth.clear(); nav('/admin/login') }}
+            className="px-4 py-2 text-sm bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors"
+          >
+            Đăng xuất
+          </button>
         </div>
 
         {loading ? (
@@ -309,9 +315,9 @@ export default function AdminPage() {
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 text-gray-600 text-xs uppercase">
                       <tr>
-                        <th className="px-4 py-3 text-left">Tên</th>
-                        <th className="px-4 py-3 text-left">SĐT</th>
-                        <th className="px-4 py-3 text-left">Handle</th>
+                        <th className="px-4 py-3 text-left">Họ và tên</th>
+                        <th className="px-4 py-3 text-left">Email</th>
+                        <th className="px-4 py-3 text-left">Nền tảng</th>
                         <th className="px-4 py-3 text-left">Trạng thái</th>
                         <th className="px-4 py-3 text-left">Ngày</th>
                       </tr>
@@ -320,8 +326,8 @@ export default function AdminPage() {
                       {ugc.map(u => (
                         <tr key={u.id} className="hover:bg-gray-50">
                           <td className="px-4 py-3 font-medium text-gray-900">{u.name}</td>
-                          <td className="px-4 py-3 text-gray-600">{u.phone}</td>
-                          <td className="px-4 py-3 text-gray-600">{u.handle || '—'}</td>
+                          <td className="px-4 py-3 text-gray-600">{u.email}</td>
+                          <td className="px-4 py-3 text-gray-600">{u.platform}</td>
                           <td className="px-4 py-3">
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
                               {u.status}
