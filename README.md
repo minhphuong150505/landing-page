@@ -226,3 +226,35 @@ landing-page/
 ## License
 
 © 2026 Laboratorios BABÉ. All rights reserved.
+
+---
+
+## Quy trình chỉnh sửa và deploy
+
+```
+1. Sửa code (frontend hoặc backend)
+        ↓
+2. Test local
+        ↓
+3. bash deploy.sh
+```
+
+### Chi tiết từng bước
+
+**Bước 1 — Sửa code**
+- Frontend (giao diện): sửa file trong `frontend/src/`
+- Backend (API/logic): sửa file trong `backend/src/`
+
+**Bước 2 — Test local**
+```bash
+docker compose up --build
+# Kiểm tra tại http://localhost:3000
+```
+
+**Bước 3 — Deploy lên production**
+```bash
+bash deploy.sh
+# Tự động: upload → build Docker trên VM → restart containers
+# Thời gian: ~4-5 phút
+# URL sau deploy: https://34.27.241.13.nip.io
+```
