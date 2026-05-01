@@ -1,5 +1,14 @@
 import { useState } from 'react'
 import { ugcApi } from '../services/api'
+import day1Image from '../assets/ugc-gallery/day-1.jpg'
+import day2Image from '../assets/ugc-gallery/day-2.jpg'
+import day3Image from '../assets/ugc-gallery/day-3.jpg'
+import day4Image from '../assets/ugc-gallery/day-4.jpg'
+import day5Image from '../assets/ugc-gallery/day-5.jpg'
+import day6Image from '../assets/ugc-gallery/day-6.jpg'
+import day7Image from '../assets/ugc-gallery/day-7.jpg'
+import day8Image from '../assets/ugc-gallery/day-8.jpg'
+import day9Image from '../assets/ugc-gallery/day-9.jpg'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 
@@ -14,8 +23,8 @@ export default function UGCChallenge() {
     try {
       const res = await ugcApi.register({
         name: fd.get('name') as string,
-        phone: fd.get('phone') as string,
-        handle: fd.get('handle') as string,
+        email: fd.get('email') as string,
+        platform: fd.get('platform') as string,
       })
       if (res.success) {
         setStatus('success')
@@ -30,10 +39,22 @@ export default function UGCChallenge() {
     }
   }
 
-  const gallery = Array.from({ length: 9 }, (_, i) => ({
+  const galleryImages = [
+    day1Image,
+    day2Image,
+    day3Image,
+    day4Image,
+    day5Image,
+    day6Image,
+    day7Image,
+    day8Image,
+    day9Image,
+  ]
+
+  const gallery = galleryImages.map((image, i) => ({
     day: `DAY ${(i % 7) + 1}`,
     user: `@user_${1000 + i * 17}`,
-    bg: `linear-gradient(160deg, #${['1e3d0e', '1a3a0b', '223d10', '1c380d', '25430f', '1f3b0c', '2a4812', '1e3d0e', '243f10'][i]}, #0d1f08)`,
+    image,
   }))
 
   return (
@@ -103,12 +124,20 @@ export default function UGCChallenge() {
               <input
                 name="name"
                 required
-                placeholder="Tên + SĐT"
+                placeholder="Họ và tên"
                 className="w-full bg-transparent border-b border-white/15 py-3 text-[15px] text-white placeholder:text-white/25 outline-none transition-colors duration-200 focus:border-[var(--g700)]"
               />
               <input
-                name="handle"
-                placeholder="@instagram / @tiktok"
+                name="email"
+                type="email"
+                required
+                placeholder="Email"
+                className="w-full bg-transparent border-b border-white/15 py-3 text-[15px] text-white placeholder:text-white/25 outline-none transition-colors duration-200 focus:border-[var(--g700)] mt-4"
+              />
+              <input
+                name="platform"
+                required
+                placeholder="Nền tảng đăng video (Instagram / TikTok / YouTube)"
                 className="w-full bg-transparent border-b border-white/15 py-3 text-[15px] text-white placeholder:text-white/25 outline-none transition-colors duration-200 focus:border-[var(--g700)] mt-4"
               />
               {status === 'error' && (
@@ -144,18 +173,24 @@ export default function UGCChallenge() {
           {gallery.map((item, i) => (
             <div
               key={i}
-              className="rounded-[10px] overflow-hidden relative aspect-[9/14]"
-              style={{ background: item.bg }}
+              className="rounded-[10px] overflow-hidden relative aspect-[9/14] bg-[#102807]"
             >
+              <img
+                src={item.image}
+                alt={`${item.day} gallery preview by ${item.user}`}
+                className="absolute inset-0 h-full w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-black/20" />
               <div className="absolute top-2 left-2 bg-black/60 text-white text-[9px] font-extrabold tracking-[0.08em] px-[7px] py-[3px] rounded">
                 {item.day}
               </div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-7 h-7 opacity-50">
+                <svg viewBox="0 0 24 24" className="w-7 h-7 opacity-70 drop-shadow">
                   <polygon points="5,3 19,12 5,21" fill="rgba(255,255,255,0.45)" />
                 </svg>
               </div>
-              <div className="absolute bottom-1.5 left-2 text-[9px] text-white/50 font-semibold">
+              <div className="absolute bottom-1.5 left-2 text-[9px] text-white/70 font-semibold drop-shadow">
                 {item.user}
               </div>
             </div>

@@ -16,17 +16,23 @@ import java.util.List;
 public class UGCRegistrationService {
 
     private final UGCRegistrationRepository ugcRegistrationRepository;
+    private final EmailService emailService;
 
     @Transactional
     public UGCRegistration register(UGCRegistrationRequest request) {
         UGCRegistration registration = new UGCRegistration();
         registration.setName(request.getName());
-        registration.setPhone(request.getPhone());
-        registration.setHandle(request.getHandle());
+        registration.setEmail(request.getEmail());
+        registration.setPlatform(request.getPlatform());
         registration.setStatus("REGISTERED");
 
         UGCRegistration saved = ugcRegistrationRepository.save(registration);
-        log.info("New UGC registration from: {}", request.getPhone());
+        log.info("New UGC registration from: {}", request.getEmail());
+        try {
+            emailService.sendUgcConfirmation(saved.getEmail(), saved.getName());
+        } catch (Exception exception) {
+            log.warn("Failed to queue UGC confirmation email: {}", exception.getMessage());
+        }
         return saved;
     }
 

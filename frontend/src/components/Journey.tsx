@@ -54,7 +54,13 @@ export default function Journey() {
               borderRadius:
                 i === 0 ? '24px 0 0 24px' : i === 2 ? '0 24px 24px 0' : '0',
             }}
-            onClick={() => document.getElementById(step.link.slice(1))?.scrollIntoView({ behavior: 'smooth' })}
+            onClick={() => {
+              if (i === 1) {
+                window.dispatchEvent(new CustomEvent('open-route-modal'))
+              } else {
+                document.getElementById(step.link.slice(1))?.scrollIntoView({ behavior: 'smooth' })
+              }
+            }}
           >
             <div className="text-[11px] font-extrabold tracking-[0.14em] text-[var(--g700)] mb-5">
               {step.num}

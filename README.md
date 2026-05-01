@@ -8,8 +8,8 @@ Landing page cho sự kiện chạy bộ đầu tiên của BABÉ Laboratorios t
 
 | Mục | Giá trị |
 |---|---|
-| **Landing page** | https://34.27.241.13.nip.io |
-| **Admin dashboard** | https://34.27.241.13.nip.io/admin |
+| **Landing page** | https://ugc-web.com |
+| **Admin dashboard** | https://ugc-web.com/admin |
 | **Admin username** | `admin` |
 | **Admin password** | `g8CnybNdm0pN8cls7aKdsmck` |
 
@@ -64,15 +64,17 @@ gcloud sql connect landing-db --user=app_user --database=landing_db --project=de
 | Frontend | React 18 + Vite + TypeScript + Tailwind CSS |
 | Backend | Spring Boot 3.2 + Java 17 + Maven |
 | Database | MySQL 8.0 + Spring Data JPA |
-| DevOps | Docker + docker-compose |
+| Email | Resend API |
+| DevOps | Docker + docker-compose + Caddy |
 
 ## Features
 
 - Landing page đầy đủ các section: Navbar, Marquee, Hero, Live Counter, Journey (3 steps), UGC Challenge, Marathon, Trade-in, Why BABÉ, FAQ, Footer CTA
 - Inner pages: Về BABÉ, Liên hệ, Chính sách bảo mật, Điều khoản sử dụng
-- Đăng ký UGC Challenge — submissions saved to MySQL
+- Đăng ký UGC Challenge — submissions saved to MySQL, email xác nhận gửi qua Resend
 - Đặt slot soi da miễn phí tại finish line
 - Đăng ký nhận newsletter
+- Admin dashboard tại `/admin` (JWT auth)
 - Countdown timer đếm ngược đến ngày chạy 10/05/2026
 - Leaflet route map với animation player
 - FAQ accordion với toggle animation
@@ -124,19 +126,7 @@ npm run dev
 | DELETE | `/api/newsletter/unsubscribe/{email}` | Hủy đăng ký newsletter |
 | POST | `/api/ugc/register` | Đăng ký UGC Challenge |
 | POST | `/api/slot/book` | Đặt slot soi da |
-
-### Example: Submit Contact Form
-
-```bash
-curl -X POST http://localhost:8080/api/contact \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Nguyễn Thị Lan",
-    "email": "lan@example.com",
-    "subject": "Hỏi về UGC Challenge",
-    "message": "Tôi muốn biết thêm chi tiết về cách tham gia."
-  }'
-```
+| POST | `/api/auth/login` | Đăng nhập admin |
 
 ### Example: UGC Registration
 
@@ -150,68 +140,6 @@ curl -X POST http://localhost:8080/api/ugc/register \
   }'
 ```
 
-### Example: Slot Booking
-
-```bash
-curl -X POST http://localhost:8080/api/slot/book \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Nguyễn Thị Lan",
-    "phone": "0901234567"
-  }'
-```
-
-## Project Structure
-
-```
-landing-page/
-├── backend/
-│   ├── pom.xml
-│   ├── Dockerfile
-│   └── src/main/java/com/app/
-│       ├── LandingPageApplication.java
-│       ├── config/CorsConfig.java
-│       ├── controller/
-│       │   ├── ContactController.java
-│       │   ├── NewsletterController.java
-│       │   ├── UGCRegistrationController.java
-│       │   └── SlotBookingController.java
-│       ├── dto/
-│       ├── entity/
-│       ├── exception/GlobalExceptionHandler.java
-│       ├── repository/
-│       └── service/
-├── frontend/
-│   ├── Dockerfile
-│   ├── nginx.conf
-│   ├── package.json
-│   └── src/
-│       ├── components/
-│       │   ├── Navbar.tsx
-│       │   ├── MarqueeBar.tsx
-│       │   ├── Hero.tsx
-│       │   ├── LiveCounter.tsx
-│       │   ├── Journey.tsx
-│       │   ├── UGCChallenge.tsx
-│       │   ├── Marathon.tsx
-│       │   ├── TradeIn.tsx
-│       │   ├── WhyBabe.tsx
-│       │   ├── FAQ.tsx
-│       │   ├── FooterCTA.tsx
-│       │   ├── RouteMapModal.tsx
-│       │   ├── SuccessModal.tsx
-│       │   └── SlotModal.tsx
-│       ├── pages/
-│       │   ├── AboutPage.tsx
-│       │   ├── ContactPage.tsx
-│       │   ├── PolicyPage.tsx
-│       │   └── TermsPage.tsx
-│       ├── services/api.ts
-│       └── types/index.ts
-├── docker-compose.yml
-└── README.md
-```
-
 ## Design Tokens
 
 | Token | Value | Usage |
@@ -223,38 +151,21 @@ landing-page/
 | `--paper` | #FBFAF6 | Light section background |
 | `--cream` | #F4F1EA | Trade-in section |
 
-## License
-
-© 2026 Laboratorios BABÉ. All rights reserved.
-
----
-
 ## Quy trình chỉnh sửa và deploy
 
 ```
-1. Sửa code (frontend hoặc backend)
-        ↓
-2. Test local
-        ↓
-3. bash deploy.sh
+1. Sửa code  →  2. Test local  →  3. bash deploy.sh
 ```
 
-### Chi tiết từng bước
-
-**Bước 1 — Sửa code**
-- Frontend (giao diện): sửa file trong `frontend/src/`
-- Backend (API/logic): sửa file trong `backend/src/`
-
-**Bước 2 — Test local**
 ```bash
+# Test local
 docker compose up --build
 # Kiểm tra tại http://localhost:3000
+
+# Deploy production (~4-5 phút)
+bash deploy.sh
 ```
 
-**Bước 3 — Deploy lên production**
-```bash
-bash deploy.sh
-# Tự động: upload → build Docker trên VM → restart containers
-# Thời gian: ~4-5 phút
-# URL sau deploy: https://34.27.241.13.nip.io
-```
+---
+
+© 2026 Laboratorios BABÉ. All rights reserved.

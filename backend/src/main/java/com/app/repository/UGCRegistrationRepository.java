@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface UGCRegistrationRepository extends JpaRepository<UGCRegistration, Long> {
     List<UGCRegistration> findAllByOrderByCreatedAtDesc();
-    List<UGCRegistration> findByPhone(String phone);
+    List<UGCRegistration> findByEmail(String email);
 }

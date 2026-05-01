@@ -1,4 +1,5 @@
 import FadeUp from './FadeUp'
+import babeImage from '../assets/babe.jpg'
 
 export default function WhyBabe() {
   const cards = [
@@ -55,7 +56,7 @@ export default function WhyBabe() {
           style={{ aspectRatio: '4/5' }}
         >
           <img
-            src="https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=800&h=1000&fit=crop"
+            src={babeImage}
             alt="BABÉ Stop AKN"
             className="w-full h-full object-cover"
           />

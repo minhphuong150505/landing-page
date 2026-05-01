@@ -341,7 +341,7 @@ cd backend && mvn clean package -DskipTests
 ```
 
 Nếu cả 2 lệnh trên không báo lỗi → an toàn để deploy.
-
+ 
 ### Bước 2: Test thủ công trên browser
 
 Dùng `docker compose up --build` rồi kiểm tra:

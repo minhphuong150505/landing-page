@@ -55,9 +55,9 @@ export default function Hero() {
 
         <div className="flex gap-2.5 justify-center flex-wrap mb-11">
           {[
-            { icon: '📍', text: 'Thủ Thiêm, TP.HCM' },
-            { icon: '📅', text: 'Ngày 10/05/2026' },
-            { icon: '⏱', text: 'UGC: 03–09/05/2026' },
+            { icon: '📍', text: 'Thủ Đức, TP.HCM' },
+            { icon: '📅', text: 'Ngày 28/06/2026' },
+            { icon: '⏱', text: '7-day challenge: 3/5–27/6' },
           ].map((pill) => (
             <div
               key={pill.text}
@@ -76,7 +76,10 @@ export default function Hero() {
           >
             Tham gia UGC Challenge
           </button>
-          <button className="btn-ghost" onClick={() => { /* open route modal */ }}>
+          <button
+            className="btn-ghost"
+            onClick={() => window.dispatchEvent(new CustomEvent('open-route-modal'))}
+          >
             Xem lộ trình chạy
           </button>
         </div>

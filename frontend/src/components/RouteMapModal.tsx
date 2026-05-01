@@ -6,140 +6,236 @@ interface RouteMapModalProps {
   onClose: () => void
 }
 
+const thuThiemRoute: [number, number][] = [
+  [10.8040, 106.7500], [10.8057, 106.7516], [10.8072, 106.7538], [10.8083, 106.7564],
+  [10.8090, 106.7592], [10.8093, 106.7622], [10.8091, 106.7652], [10.8084, 106.7680],
+  [10.8073, 106.7705], [10.8057, 106.7726], [10.8038, 106.7740], [10.8019, 106.7746],
+  [10.7999, 106.7744], [10.7981, 106.7734], [10.7966, 106.7717], [10.7954, 106.7694],
+  [10.7948, 106.7668], [10.7947, 106.7641], [10.7952, 106.7613], [10.7963, 106.7588],
+  [10.7979, 106.7567], [10.7999, 106.7552], [10.8020, 106.7545], [10.8040, 106.7545],
+  [10.8059, 106.7552], [10.8076, 106.7565], [10.8089, 106.7583], [10.8097, 106.7604],
+  [10.8099, 106.7627], [10.8096, 106.7650], [10.8087, 106.7671], [10.8074, 106.7688],
+  [10.8057, 106.7499], [10.8040, 106.7500],
+]
+
+const DEFAULT_CENTER: [number, number] = [10.8040, 106.7622]
+const DEFAULT_ZOOM = 15
+const TOTAL_KM = 6.0
+const TOTAL_MIN = 35
+const DEMO_DURATION_MS = 90 * 1000
+
+const OSM_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+const ESRI_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+
+const clampProgress = (value: number) => Math.min(Math.max(value, 0), 1)
+
+const routeSegments = thuThiemRoute.slice(0, -1).map((start, index) => {
+  const end = thuThiemRoute[index + 1]
+  return {
+    start,
+    end,
+    distance: L.latLng(start).distanceTo(L.latLng(end)),
+  }
+})
+
+const routeSegmentsWithDistance = routeSegments.map((segment, index) => {
+  const startDistance = routeSegments
+    .slice(0, index)
+    .reduce((total, item) => total + item.distance, 0)
+
+  return {
+    ...segment,
+    startDistance,
+    endDistance: startDistance + segment.distance,
+  }
+})
+
+const totalRouteDistance = routeSegments.reduce((total, segment) => total + segment.distance, 0)
+
 export default function RouteMapModal({ open, onClose }: RouteMapModalProps) {
   const mapRef = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<L.Map | null>(null)
   const polylineRef = useRef<L.Polyline | null>(null)
-  const markerRef = useRef<L.CircleMarker | null>(null)
+  const animMarkerRef = useRef<L.CircleMarker | null>(null)
+  const tileLayerRef = useRef<L.TileLayer | null>(null)
+
+  const [style, setStyle] = useState<'normal' | 'satellite'>('normal')
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const animRef = useRef<number | null>(null)
 
-  const routeCoords: L.LatLngExpression[] = [
-    [10.7743, 106.7208],
-    [10.7750, 106.7215],
-    [10.7760, 106.7220],
-    [10.7770, 106.7218],
-    [10.7775, 106.7210],
-    [10.7780, 106.7200],
-    [10.7775, 106.7190],
-    [10.7765, 106.7185],
-    [10.7755, 106.7188],
-    [10.7748, 106.7195],
-    [10.7743, 106.7208],
-  ]
+  const animFrameRef = useRef<number | null>(null)
+  const startTimeRef = useRef<number>(0)
+  const progressRef = useRef(0)
 
   useEffect(() => {
     if (!open || !mapRef.current || mapInstance.current) return
 
     const map = L.map(mapRef.current, {
-      center: [10.7762, 106.7202],
-      zoom: 15,
+      center: DEFAULT_CENTER,
+      zoom: DEFAULT_ZOOM,
       zoomControl: false,
     })
     mapInstance.current = map
 
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap',
+    tileLayerRef.current = L.tileLayer(OSM_URL, {
+      attribution: '© OpenStreetMap',
+      maxZoom: 19,
     }).addTo(map)
 
-    L.control.zoom({ position: 'bottomright' }).addTo(map)
+    L.control.zoom({ position: 'topleft' }).addTo(map)
 
-    const polyline = L.polyline(routeCoords, {
+    const polyline = L.polyline(thuThiemRoute, {
       color: '#6FA234',
-      weight: 4,
+      weight: 5,
       opacity: 0.9,
+      dashArray: '6,6',
     }).addTo(map)
     polylineRef.current = polyline
 
-    const marker = L.circleMarker(routeCoords[0], {
-      radius: 8,
+    L.circleMarker(thuThiemRoute[0], {
+      radius: 9,
       fillColor: '#6FA234',
       color: '#fff',
-      weight: 2,
-      opacity: 1,
+      weight: 3,
+      fillOpacity: 1,
+    })
+      .addTo(map)
+      .bindPopup('Start / Finish<br>Sala Thủ Thiêm')
+
+    animMarkerRef.current = L.circleMarker(thuThiemRoute[0], {
+      radius: 11,
+      fillColor: '#6FA234',
+      color: '#fff',
+      weight: 3,
       fillOpacity: 1,
     }).addTo(map)
-    markerRef.current = marker
 
-    map.fitBounds(polyline.getBounds(), { padding: [20, 20] })
+    map.fitBounds(polyline.getBounds(), { padding: [50, 50] })
+
+    setTimeout(() => map.invalidateSize(), 150)
 
     return () => {
-      if (animRef.current) cancelAnimationFrame(animRef.current)
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
       map.remove()
       mapInstance.current = null
       polylineRef.current = null
-      markerRef.current = null
+      animMarkerRef.current = null
+      tileLayerRef.current = null
     }
   }, [open])
 
   useEffect(() => {
     if (!open) {
+      if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
       setIsPlaying(false)
       setProgress(0)
-      if (animRef.current) cancelAnimationFrame(animRef.current)
+      progressRef.current = 0
+      setStyle('normal')
     }
   }, [open])
 
-  const toggleAnim = () => {
-    if (isPlaying) {
-      setIsPlaying(false)
-      if (animRef.current) cancelAnimationFrame(animRef.current)
-    } else {
-      setIsPlaying(true)
-      animateRoute()
-    }
+  useEffect(() => {
+    const map = mapInstance.current
+    if (!map || !tileLayerRef.current) return
+    map.removeLayer(tileLayerRef.current)
+    tileLayerRef.current = L.tileLayer(style === 'satellite' ? ESRI_URL : OSM_URL, {
+      attribution: style === 'satellite' ? '© Esri' : '© OpenStreetMap',
+      maxZoom: 19,
+    }).addTo(map)
+  }, [style])
+
+  const updateMarker = (p: number) => {
+    const marker = animMarkerRef.current
+    if (!marker) return
+
+    const clampedProgress = clampProgress(p)
+    const targetDistance = clampedProgress * totalRouteDistance
+    const segment =
+      routeSegmentsWithDistance.find((item) => targetDistance <= item.endDistance) ??
+      routeSegmentsWithDistance[routeSegmentsWithDistance.length - 1]
+    const segmentProgress =
+      segment.distance === 0 ? 0 : (targetDistance - segment.startDistance) / segment.distance
+    const lat = segment.start[0] + (segment.end[0] - segment.start[0]) * segmentProgress
+    const lng = segment.start[1] + (segment.end[1] - segment.start[1]) * segmentProgress
+
+    marker.setLatLng([lat, lng])
+    marker.bringToFront()
   }
 
-  const animateRoute = () => {
-    if (!polylineRef.current || !markerRef.current) return
-    const totalPoints = routeCoords.length
-    let currentIdx = Math.floor((progress / 100) * (totalPoints - 1))
-    let startTime: number | null = null
-    const segmentDuration = 800
+  const play = () => {
+    if (!mapInstance.current) return
+    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current)
 
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp
-      const elapsed = timestamp - startTime
-      const segProgress = Math.min(elapsed / segmentDuration, 1)
+    if (progressRef.current >= 1) {
+      progressRef.current = 0
+      setProgress(0)
+      updateMarker(0)
+    }
 
-      const from = routeCoords[currentIdx] as L.LatLngExpression
-      const to = routeCoords[Math.min(currentIdx + 1, totalPoints - 1)] as L.LatLngExpression
-      const lat =
-        (from as L.LatLng).lat +
-        ((to as L.LatLng).lat - (from as L.LatLng).lat) * segProgress
-      const lng =
-        (from as L.LatLng).lng +
-        ((to as L.LatLng).lng - (from as L.LatLng).lng) * segProgress
+    setIsPlaying(true)
+    startTimeRef.current = performance.now() - progressRef.current * DEMO_DURATION_MS
 
-      markerRef.current?.setLatLng([lat, lng])
-
-      const overallProgress = ((currentIdx + segProgress) / (totalPoints - 1)) * 100
-      setProgress(overallProgress)
-
-      if (segProgress < 1) {
-        animRef.current = requestAnimationFrame(step)
+    const step = (ts: number) => {
+      const elapsed = ts - startTimeRef.current
+      const p = clampProgress(elapsed / DEMO_DURATION_MS)
+      progressRef.current = p
+      setProgress(p)
+      updateMarker(p)
+      if (p < 1) {
+        animFrameRef.current = requestAnimationFrame(step)
       } else {
-        currentIdx++
-        if (currentIdx < totalPoints - 1) {
-          startTime = null
-          animRef.current = requestAnimationFrame(step)
-        } else {
-          setIsPlaying(false)
-        }
+        animFrameRef.current = null
+        setIsPlaying(false)
       }
     }
-    animRef.current = requestAnimationFrame(step)
+
+    animFrameRef.current = requestAnimationFrame(step)
   }
 
-  const resetAnim = () => {
-    if (animRef.current) cancelAnimationFrame(animRef.current)
+  const pause = () => {
     setIsPlaying(false)
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current)
+      animFrameRef.current = null
+    }
+  }
+
+  const togglePlay = () => (isPlaying ? pause() : play())
+
+  const reset = () => {
+    pause()
+    progressRef.current = 0
     setProgress(0)
-    markerRef.current?.setLatLng(routeCoords[0])
+    updateMarker(0)
+  }
+
+  const refreshMap = () => {
+    mapInstance.current?.setView(DEFAULT_CENTER, DEFAULT_ZOOM)
+  }
+
+  const centerRoute = () => {
+    const map = mapInstance.current
+    const polyline = polylineRef.current
+    if (map && polyline) map.fitBounds(polyline.getBounds(), { padding: [50, 50] })
   }
 
   if (!open) return null
+
+  const displayProgress = clampProgress(progress)
+  const km = (displayProgress * TOTAL_KM).toFixed(1)
+  const totalSec = Math.floor(displayProgress * TOTAL_MIN * 60)
+  const mins = Math.floor(totalSec / 60)
+  const secs = totalSec % 60
+  const timeLabel =
+    displayProgress === 0
+      ? 'Chưa bắt đầu'
+      : `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')} / 35:00`
+
+  const ctrlBtn = (active: boolean): React.CSSProperties => ({
+    background: active ? 'var(--g700)' : 'rgba(111,162,52,0.1)',
+    border: `1px solid ${active ? 'var(--g700)' : 'rgba(111,162,52,0.3)'}`,
+    color: active ? '#fff' : 'var(--g83)',
+  })
 
   return (
     <div
@@ -157,8 +253,7 @@ export default function RouteMapModal({ open, onClose }: RouteMapModalProps) {
       >
         <div>
           <div className="text-lg font-extrabold text-white">
-            🗺️ Lộ trình <span className="text-[var(--g700)]">Thủ Thiêm</span> — The Running
-            Babes
+            🗺️ Lộ trình <span className="text-[var(--g700)]">Thủ Thiêm</span> — The Running Babes
           </div>
           <div className="text-xs text-white/40 mt-1">
             Vòng tròn ~6 km · Sala, Thủ Thiêm, Q2
@@ -207,76 +302,57 @@ export default function RouteMapModal({ open, onClose }: RouteMapModalProps) {
         }}
       >
         <button
+          onClick={() => setStyle('normal')}
           className="px-[18px] py-2 rounded-lg text-[13px] font-bold transition-all duration-200"
-          style={{
-            background: 'rgba(111,162,52,0.1)',
-            border: '1px solid rgba(111,162,52,0.3)',
-            color: 'var(--g83)',
-          }}
+          style={ctrlBtn(style === 'normal')}
         >
           Bình thường
         </button>
         <button
+          onClick={() => setStyle('satellite')}
           className="px-[18px] py-2 rounded-lg text-[13px] font-bold transition-all duration-200"
-          style={{
-            background: 'rgba(111,162,52,0.1)',
-            border: '1px solid rgba(111,162,52,0.3)',
-            color: 'var(--g83)',
-          }}
+          style={ctrlBtn(style === 'satellite')}
         >
           Vệ tinh
         </button>
         <button
-          onClick={resetAnim}
+          onClick={refreshMap}
           className="px-[18px] py-2 rounded-lg text-[13px] font-bold transition-all duration-200"
-          style={{
-            background: 'rgba(111,162,52,0.1)',
-            border: '1px solid rgba(111,162,52,0.3)',
-            color: 'var(--g83)',
-          }}
+          style={ctrlBtn(false)}
         >
           🏠 Làm mới bản đồ
         </button>
         <button
+          onClick={centerRoute}
           className="px-[18px] py-2 rounded-lg text-[13px] font-bold transition-all duration-200"
-          style={{
-            background: 'rgba(111,162,52,0.1)',
-            border: '1px solid rgba(111,162,52,0.3)',
-            color: 'var(--g83)',
-          }}
+          style={ctrlBtn(false)}
         >
           🎯 Căn giữa lộ trình
         </button>
       </div>
 
       {/* Player */}
-      <div
-        className="flex-shrink-0"
-        style={{ padding: '18px 32px', background: '#111' }}
-      >
+      <div className="flex-shrink-0" style={{ padding: '18px 32px', background: '#111' }}>
         <div className="flex items-center justify-between gap-5 max-w-full">
           <div className="flex items-center gap-2.5">
             <div className="w-2.5 h-2.5 rounded-full bg-[var(--g700)] animate-pulse" />
             <div>
               <div className="text-[15px] font-extrabold text-white">
-                <strong className="text-[var(--g700)]">{(progress / 100 * 6).toFixed(1)}</strong>{' '}
-                / 6.0 km
+                <strong className="text-[var(--g700)]">{km}</strong> / 6.0 km
               </div>
-              <div className="text-xs text-white/40 mt-0.5">
-                {isPlaying ? 'Đang phát...' : 'Chưa bắt đầu'}
-              </div>
+              <div className="text-xs text-white/40 mt-0.5">{timeLabel}</div>
             </div>
           </div>
           <div className="flex gap-2.5">
             <button
-              onClick={toggleAnim}
+              onClick={togglePlay}
               className="px-[22px] py-2.5 rounded-lg text-[13px] font-extrabold transition-colors duration-200"
               style={{ background: 'var(--g700)', color: '#fff' }}
             >
               {isPlaying ? '⏸ Tạm dừng' : '▶ Phát'}
             </button>
             <button
-              onClick={resetAnim}
+              onClick={reset}
               className="px-[22px] py-2.5 rounded-lg text-[13px] font-extrabold transition-colors duration-200"
               style={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.7)' }}
             >
@@ -290,7 +366,7 @@ export default function RouteMapModal({ open, onClose }: RouteMapModalProps) {
         >
           <div
             className="h-full bg-[var(--g700)] rounded-sm transition-all duration-100"
-            style={{ width: `${progress}%` }}
+            style={{ width: `${displayProgress * 100}%` }}
           />
         </div>
       </div>
