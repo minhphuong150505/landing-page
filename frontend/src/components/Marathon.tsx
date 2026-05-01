@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import FadeUp from './FadeUp'
 
 function CountdownTimer() {
-  const target = new Date('2026-05-10T06:00:00+07:00')
+  const target = new Date('2026-06-28T06:00:00+07:00')
   const [diff, setDiff] = useState(Math.max(0, target.getTime() - Date.now()))
 
   useEffect(() => {
@@ -45,12 +45,10 @@ function CountdownTimer() {
 
 export default function Marathon() {
   const specs = [
-    { key: 'Ngày', val: '10/05/2026' },
-    { key: 'Địa điểm', val: 'Thủ Thiêm, TP.HCM' },
-    { key: 'Cự ly', val: '6 km (vòng tròn)' },
+    { key: 'Ngày', val: '28/06/2026' },
+    { key: 'Địa điểm', val: 'Thủ Đức, TP.HCM' },
+    { key: 'Cự ly', val: '6 km' },
     { key: 'Lộ trình', val: 'ACTION 360° Loop' },
-    { key: 'Điều kiện', val: 'Hoàn thành UGC 7 ngày' },
-    { key: 'Quyền lợi tại đích', val: 'Bộ sản phẩm BABÉ + Soi da' },
   ]
 
   return (
@@ -75,7 +73,7 @@ export default function Marathon() {
             <br />
             Marathon
           </h2>
-          <p className="text-white/70 mt-4">10/05/2026 · Thủ Thiêm · 6 km vòng tròn phá loop.</p>
+          <p className="text-white/70 mt-4">28/06/2026 · Thủ Đức · 6 km phá loop.</p>
         </FadeUp>
 
         <FadeUp className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-[60px] items-center mt-14">
@@ -154,7 +152,12 @@ export default function Marathon() {
               >
                 Đăng ký qua UGC Challenge
               </button>
-              <button className="btn-white-ghost">Xem bản đồ lộ trình</button>
+              <button
+                className="btn-white-ghost"
+                onClick={() => window.dispatchEvent(new CustomEvent('open-route-modal'))}
+              >
+                Xem bản đồ lộ trình
+              </button>
             </div>
           </div>
         </FadeUp>

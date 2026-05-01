@@ -1,5 +1,6 @@
 package com.app.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -11,10 +12,12 @@ public class UGCRegistrationRequest {
     @Size(max = 100, message = "Name must be at most 100 characters")
     private String name;
 
-    @NotBlank(message = "Phone is required")
-    @Size(max = 20, message = "Phone must be at most 20 characters")
-    private String phone;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email is invalid")
+    @Size(max = 150, message = "Email must be at most 150 characters")
+    private String email;
 
-    @Size(max = 50, message = "Handle must be at most 50 characters")
-    private String handle;
+    @NotBlank(message = "Platform is required")
+    @Size(max = 100, message = "Platform must be at most 100 characters")
+    private String platform;
 }

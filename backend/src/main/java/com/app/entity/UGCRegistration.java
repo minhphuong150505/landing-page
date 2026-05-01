@@ -21,11 +21,11 @@ public class UGCRegistration {
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Column(nullable = false, length = 20)
-    private String phone;
+    @Column(nullable = false, length = 150)
+    private String email;
 
-    @Column(length = 50)
-    private String handle;
+    @Column(nullable = false, length = 100)
+    private String platform;
 
     @Column(nullable = false)
     private String status = "REGISTERED";
